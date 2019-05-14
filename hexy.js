@@ -249,6 +249,68 @@ var Hexy = function (buffer, config) {
 
   var pos = 0
 
+
+  this._getFormatLength = () => {
+    if (self.format === "eights") {
+      return 8;
+    } else if (self.format === "fours") {
+      return 4;
+    } else if (self.format === "twos") {
+      return 2;
+    }
+  }
+
+  this._getPadLength = () => {
+    let padlen = 0;
+    switch(self.format) {
+      case "eights":
+        padlen = self.width * 2 + Math.floor(self.width/4);
+        break
+      case "fours":
+        padlen = self.width * 2 + Math.floor(self.width/2);
+        break
+      case "twos":
+        padlen = self.width * 3 + 2;
+        break
+      default:
+        padlen = self.width * 2 + 1;
+    }
+    return padlen;
+  }
+
+  this._getAsciiString = (raw) => {
+    return raw.replace(/[\000-\040\177-\377]/g, ".");
+  }
+
+  this.toArray = () => {
+    const arr = [];
+    const line_arr = lines();
+    for (let i = 0; i != line_arr.length; ++i) {
+      const hex_raw = line_arr[i];
+      const hex = hex_raw[0];
+      const raw = hex_raw[1];
+      const howMany = self._getFormatLength() || hex.length;
+      
+      let hex_formatted = "";
+      for (let j = 0; j< hex.length; j+=howMany) {
+        var s = hex.substr(j, howMany)
+        hex_formatted += s + " ";
+      }
+
+      const addr = self._getAddress(i);
+      arr.push({
+        hex: hex_formatted,
+        numbering: pad(addr, 8),
+        ascii: self._getAsciiString(raw)
+      })
+    }
+    return arr;
+  }
+
+  this._getAddress = (index) => {
+    return ( index * self.width ) + self.offset + self.display_offset;
+  }
+
   this.toString = function () {
     var str = ""
     
@@ -262,14 +324,7 @@ var Hexy = function (buffer, config) {
           hex = hex_raw[0],
           raw = hex_raw[1]
       //insert spaces every `self.format.twos`, fours or eights
-      var howMany = hex.length
-      if (self.format === "eights") {
-        howMany = 8
-      } else if (self.format === "fours") {
-        howMany = 4
-      } else if (self.format === "twos") {
-        howMany = 2
-      }
+      const howMany = self._getFormatLength() || hex.length;
 
       var hex_formatted = ""
 
@@ -279,7 +334,7 @@ var Hexy = function (buffer, config) {
         hex_formatted += s + " "
       } 
 
-      var addr = (i*self.width)+self.offset+self.display_offset;
+      var addr = self._getAddress(i);
       if (self.html) {
         odd = i%2 == 0 ? " even" : "  odd"
         str += "<div class='"+pad(addr, 8)+odd+"'>"
@@ -291,25 +346,12 @@ var Hexy = function (buffer, config) {
         str += ": "
       }
       
-      var padlen = 0
-      switch(self.format) {
-        case "eights":
-          padlen = self.width*2 + Math.floor(self.width/4)
-          break
-        case "fours":
-          padlen = self.width*2 + Math.floor(self.width/2)
-          break
-        case "twos":
-          padlen = self.width*3 + 2
-          break
-        default:
-          padlen = self.width * 2 + 1
-      }
+      var padlen = self._getPadLength();
 
       str += rpad(hex_formatted, padlen)
       if (self.annotate === "ascii") {
         str+=" "
-        var ascii = raw.replace(/[\000-\040\177-\377]/g, ".")
+        var ascii = self._getAsciiString(raw);
         if (self.html) {str += escape(ascii)}
         else { str += ascii }
       }
