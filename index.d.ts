@@ -1,3 +1,4 @@
+/// <reference types="node" />
 
 declare module "hexy" {
   type FormatOptions = {
