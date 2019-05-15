@@ -15,7 +15,7 @@
   "bin": {
     "hexy": "./bin/hexy_cmd.js"
   },
-  "devDependencies": {
-    "@types/node": "^10.12.6"
+  "dependencies": {
+    "@types/node": "10.14.6"
   }
 }
