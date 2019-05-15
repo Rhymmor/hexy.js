@@ -300,7 +300,7 @@ var Hexy = function (buffer, config) {
       const addr = self._getAddress(i);
       arr.push({
         hex: hex_formatted,
-        numbering: pad(addr, 8),
+        lineNumber: pad(addr, 8),
         ascii: self._getAsciiString(raw)
       })
     }

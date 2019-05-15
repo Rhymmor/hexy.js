@@ -1,6 +1,8 @@
 /// <reference types="node" />
 
 declare module "hexy" {
+  type Arg = Buffer | string | number[];
+
   type FormatOptions = {
     width?: number;
     numbering?: "hex_bytes" | "none";
@@ -14,5 +16,19 @@ declare module "hexy" {
     length?: number;
     display_offset?: number;
   }
-  export const hexy: (arg: Buffer | string | number[], format?: FormatOptions) => string;
+
+  export interface IHexLine {
+    hex: string;
+    lineNumber: string;
+    ascii: string;
+  }
+
+  export class Hexy {
+    constructor(arg: Arg, format?: FormatOptions);
+
+    toArray(): IHexLine[];
+    toString(): string;
+  }
+
+  export const hexy: (arg: Arg, format?: FormatOptions) => string;
 }
